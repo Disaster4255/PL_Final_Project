@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Prediction Leaderboard{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>🏆 Prediction Leaderboard</h2>
+    <p>Top scouters by prediction accuracy</p>
+    
+    {% if leaderboard %}
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Scouter</th>
+                <th>Level</th>
+                <th>Prediction Points</th>
+                <th>Experience</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for profile in leaderboard %}
+            <tr{% if profile.user == user %} style="background: #fff3cd;"{% endif %}>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ profile.user.username }}{% if profile.user == user %} (You){% endif %}</td>
+                <td>{{ profile.level }}</td>
+                <td><strong>{{ profile.prediction_points }}</strong></td>
+                <td>{{ profile.experience_points }} XP</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No predictions submitted yet. Start making predictions to appear on the leaderboard!</p>
+    {% endif %}
+</div>
+{% endblock %}

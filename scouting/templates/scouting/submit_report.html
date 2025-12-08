@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Scouting Report{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Scouting Report</h2>
+    <p><strong>Match:</strong> {{ assignment.match.match_number }} | <strong>Team:</strong> {{ assignment.team.team_number }}</p>
+    <p><strong>Position:</strong> {{ assignment.get_position_display }}</p>
+    
+    {% if existing_report %}
+    <div style="background: #fff3cd; padding: 1rem; border-radius: 4px; border-left: 4px solid #ffc107; margin-top: 1rem;">
+        <strong>⚠ Report Already Submitted</strong><br>
+        You have already submitted a report for this assignment on {{ existing_report.submitted_at|date:"M d, Y H:i" }}.<br>
+        Status: {% if existing_report.confirmed %}<span style="color: green;">✓ Confirmed</span>{% else %}<span style="color: orange;">Pending Confirmation</span>{% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{% if not existing_report %}
+<form method="post" id="scoutingForm" onsubmit="return handleFormSubmit(event)">
+    {% csrf_token %}
+    
+    <div class="card">
+        <h3>Pre-Match</h3>
+        <div class="form-group">
+            <label for="robot_starting_position">Starting Position</label>
+            <input type="text" id="robot_starting_position" name="robot_starting_position" placeholder="e.g., Center, Left, Right">
+        </div>
+        <div class="form-group">
+            <label for="pre_match_notes">Pre-Match Notes</label>
+            <textarea id="pre_match_notes" name="pre_match_notes" rows="3"></textarea>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h3>Autonomous Period</h3>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="auto_mobility">
+                Mobility (Robot moved)
+            </label>
+        </div>
+        <div class="form-group">
+            <label for="auto_game_pieces_scored">Game Pieces Scored</label>
+            <input type="number" id="auto_game_pieces_scored" name="auto_game_pieces_scored" value="0" min="0">
+        </div>
+        <div class="form-group">
+            <label for="auto_game_pieces_missed">Game Pieces Missed</label>
+            <input type="number" id="auto_game_pieces_missed" name="auto_game_pieces_missed" value="0" min="0">
+        </div>
+        <div class="form-group">
+            <label for="auto_points_estimate">Estimated Points</label>
+            <input type="number" id="auto_points_estimate" name="auto_points_estimate" value="0" min="0">
+        </div>
+        <div class="form-group">
+            <label for="auto_notes">Auto Notes</label>
+            <textarea id="auto_notes" name="auto_notes" rows="2"></textarea>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h3>Teleoperated Period</h3>
+        <div class="form-group">
+            <label for="teleop_game_pieces_scored">Game Pieces Scored</label>
+            <input type="number" id="teleop_game_pieces_scored" name="teleop_game_pieces_scored" value="0" min="0">
+        </div>
+        <div class="form-group">
+            <label for="teleop_game_pieces_missed">Game Pieces Missed</label>
+            <input type="number" id="teleop_game_pieces_missed" name="teleop_game_pieces_missed" value="0" min="0">
+        </div>
+        <div class="form-group">
+            <label for="teleop_defense_rating">Defense Rating (0-5)</label>
+            <input type="range" id="teleop_defense_rating" name="teleop_defense_rating" min="0" max="5" value="0" oninput="this.nextElementSibling.value = this.value">
+            <output>0</output>
+        </div>
+        <div class="form-group">
+            <label for="teleop_speed_rating">Speed Rating (0-5)</label>
+            <input type="range" id="teleop_speed_rating" name="teleop_speed_rating" min="0" max="5" value="0" oninput="this.nextElementSibling.value = this.value">
+            <output>0</output>
+        </div>
+        <div class="form-group">
+            <label for="teleop_notes">Teleop Notes</label>
+            <textarea id="teleop_notes" name="teleop_notes" rows="2"></textarea>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h3>Endgame</h3>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="endgame_climb_attempted">
+                Climb Attempted
+            </label>
+        </div>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="endgame_climb_success">
+                Climb Successful
+            </label>
+        </div>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="endgame_park">
+                Parked
+            </label>
+        </div>
+        <div class="form-group">
+            <label for="endgame_points_estimate">Estimated Endgame Points</label>
+            <input type="number" id="endgame_points_estimate" name="endgame_points_estimate" value="0" min="0">
+        </div>
+        <div class="form-group">
+            <label for="endgame_notes">Endgame Notes</label>
+            <textarea id="endgame_notes" name="endgame_notes" rows="2"></textarea>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h3>Post-Match</h3>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="robot_disabled">
+                Robot Disabled/Broke
+            </label>
+        </div>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="robot_tippy">
+                Robot Tippy/Unstable
+            </label>
+        </div>
+        <div class="form-group">
+            <label for="fouls_committed">Fouls Committed</label>
+            <input type="number" id="fouls_committed" name="fouls_committed" value="0" min="0">
+        </div>
+        <div class="form-group">
+            <label for="overall_rating">Overall Rating (0-10)</label>
+            <input type="range" id="overall_rating" name="overall_rating" min="0" max="10" value="5" oninput="this.nextElementSibling.value = this.value">
+            <output>5</output>
+        </div>
+        <div class="form-group">
+            <label for="post_match_notes">Post-Match Notes</label>
+            <textarea id="post_match_notes" name="post_match_notes" rows="3"></textarea>
+        </div>
+    </div>
+    
+    <div class="card">
+        <button type="submit" id="submitBtn" class="btn btn-success">Submit Report</button>
+        <button type="submit" id="qrBtn" class="btn" name="offline_mode" value="true">Generate QR Code (Offline)</button>
+        <a href="{% url 'scouter_dashboard' %}" class="btn" style="background: #6c757d;">Cancel</a>
+    </div>
+</form>
+
+<script>
+let formSubmitting = false;
+
+function handleFormSubmit(event) {
+    // Prevent double submission
+    if (formSubmitting) {
+        event.preventDefault();
+        return false;
+    }
+    
+    // Mark as submitting
+    formSubmitting = true;
+    
+    // Disable submit buttons
+    const submitBtn = document.getElementById('submitBtn');
+    const qrBtn = document.getElementById('qrBtn');
+    const form = document.getElementById('scoutingForm');
+    
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+        submitBtn.style.opacity = '0.6';
+    }
+    
+    if (qrBtn) {
+        qrBtn.disabled = true;
+        qrBtn.style.opacity = '0.6';
+    }
+    
+    // Store submission state in sessionStorage
+    const submissionKey = 'report_submission_' + {{ assignment.id }};
+    sessionStorage.setItem(submissionKey, 'true');
+    
+    // Allow form to submit
+    return true;
+}
+
+// Check if form was already submitted (page reload after submission)
+window.addEventListener('DOMContentLoaded', function() {
+    const submissionKey = 'report_submission_' + {{ assignment.id }};
+    const wasSubmitted = sessionStorage.getItem(submissionKey);
+    
+    if (wasSubmitted) {
+        // Clear the flag
+        sessionStorage.removeItem(submissionKey);
+        
+        // Disable form to prevent resubmission
+        const form = document.getElementById('scoutingForm');
+        if (form) {
+            const submitBtn = document.getElementById('submitBtn');
+            const qrBtn = document.getElementById('qrBtn');
+            
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Already Submitted';
+                submitBtn.style.opacity = '0.6';
+            }
+            
+            if (qrBtn) {
+                qrBtn.disabled = true;
+                qrBtn.style.opacity = '0.6';
+            }
+            
+            // Show message
+            const card = document.querySelector('.card');
+            if (card) {
+                const message = document.createElement('div');
+                message.style.cssText = 'background: #d4edda; padding: 1rem; border-radius: 4px; border-left: 4px solid #28a745; margin-top: 1rem;';
+                message.innerHTML = '<strong>✓ Report Submitted</strong><br>Your report has been submitted. Redirecting to dashboard...';
+                card.appendChild(message);
+            }
+            
+            // Redirect after 2 seconds
+            setTimeout(function() {
+                window.location.href = "{% url 'scouter_dashboard' %}";
+            }, 2000);
+        }
+    }
+});
+
+// Warn user if they try to leave with unsaved changes
+let formChanged = false;
+const form = document.getElementById('scoutingForm');
+if (form) {
+    form.addEventListener('change', function() {
+        formChanged = true;
+    });
+    
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged && !formSubmitting) {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+        }
+    });
+}
+</script>
+{% else %}
+<div class="card">
+    <h3>Report Details</h3>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+        <div>
+            <strong>Submitted:</strong> {{ existing_report.submitted_at|date:"M d, Y H:i" }}
+        </div>
+        <div>
+            <strong>Overall Rating:</strong> {{ existing_report.overall_rating }}/10
+        </div>
+        <div>
+            <strong>Auto Scored:</strong> {{ existing_report.auto_game_pieces_scored }}
+        </div>
+        <div>
+            <strong>Teleop Scored:</strong> {{ existing_report.teleop_game_pieces_scored }}
+        </div>
+        <div>
+            <strong>Endgame:</strong> 
+            {% if existing_report.endgame_climb_success %}✓ Climb
+            {% elif existing_report.endgame_park %}✓ Park
+            {% else %}—{% endif %}
+        </div>
+        <div>
+            <strong>Status:</strong> 
+            {% if existing_report.confirmed %}
+            <span style="color: green;">✓ Confirmed by {{ existing_report.confirmed_by.username }}</span>
+            {% else %}
+            <span style="color: orange;">⚠ Pending</span>
+            {% endif %}
+        </div>
+    </div>
+    <div style="margin-top: 1rem;">
+        <a href="{% url 'scouter_dashboard' %}" class="btn">Back to Dashboard</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

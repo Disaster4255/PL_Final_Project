@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Prediction{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Submit Match Prediction</h2>
+    <p><strong>Match {{ match.match_number }}</strong> - {{ match.event.name }}</p>
+    <p><strong>Status:</strong> {{ match.get_status_display }}</p>
+    
+    {% if existing_prediction %}
+    <div style="background: #e3f2fd; padding: 1rem; border-radius: 4px; border-left: 4px solid #2196f3; margin: 1rem 0;">
+        <strong>Your Current Prediction:</strong> 
+        <span style="font-weight: bold; color: {% if existing_prediction.predicted_winner == 'RED' %}#d32f2f{% else %}#1976d2{% endif %};">
+            {{ existing_prediction.predicted_winner }} Alliance
+        </span>
+        {% if existing_prediction.is_correct is not None %}
+        <br>
+        Result: {% if existing_prediction.is_correct %}
+            <span style="color: green;">✓ Correct (+1 point)</span>
+        {% else %}
+            <span style="color: red;">✗ Incorrect</span>
+        {% endif %}
+        {% endif %}
+        <br>
+        <small>Submitted: {{ existing_prediction.created_at|date:"M d, Y H:i" }}</small>
+        {% if match.status == 'UPCOMING' %}
+        <br><small style="color: #666;">You can update your prediction below until the match starts.</small>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+        <div style="background: #ffebee; padding: 1rem; border-radius: 4px;">
+            <h4>Red Alliance</h4>
+            <p>{{ match.red_1.team_number }}, {{ match.red_2.team_number }}, {{ match.red_3.team_number }}</p>
+        </div>
+        <div style="background: #e3f2fd; padding: 1rem; border-radius: 4px;">
+            <h4>Blue Alliance</h4>
+            <p>{{ match.blue_1.team_number }}, {{ match.blue_2.team_number }}, {{ match.blue_3.team_number }}</p>
+        </div>
+    </div>
+    
+    {% if match.status == 'UPCOMING' %}
+    <form method="post" id="predictionForm" onsubmit="return handlePredictionSubmit(event)">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Who will win?</label>
+            <div>
+                <label style="display: inline-block; margin-right: 2rem;">
+                    <input type="radio" name="predicted_winner" value="RED" required 
+                           {% if existing_prediction and existing_prediction.predicted_winner == 'RED' %}checked{% endif %}>
+                    Red Alliance
+                </label>
+                <label style="display: inline-block;">
+                    <input type="radio" name="predicted_winner" value="BLUE" required
+                           {% if existing_prediction and existing_prediction.predicted_winner == 'BLUE' %}checked{% endif %}>
+                    Blue Alliance
+                </label>
+            </div>
+        </div>
+        <button type="submit" id="predictionBtn" class="btn btn-success">
+            {% if existing_prediction %}Update Prediction{% else %}Submit Prediction{% endif %}
+        </button>
+        <a href="{% url 'match_detail' match.id %}" class="btn" style="background: #6c757d;">Cancel</a>
+    </form>
+    
+    <script>
+    let predictionSubmitting = false;
+    
+    function handlePredictionSubmit(event) {
+        if (predictionSubmitting) {
+            event.preventDefault();
+            return false;
+        }
+        
+        predictionSubmitting = true;
+        
+        const btn = document.getElementById('predictionBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+            btn.style.opacity = '0.6';
+        }
+        
+        return true;
+    }
+    </script>
+    {% else %}
+    <div style="background: #fff3cd; padding: 1rem; border-radius: 4px; border-left: 4px solid #ffc107; margin: 1rem 0;">
+        <strong>⚠ Predictions Locked</strong><br>
+        This match has already started or completed. Predictions can only be submitted before the match begins.
+    </div>
+    <a href="{% url 'match_detail' match.id %}" class="btn">Back to Match</a>
+    {% endif %}
+</div>
+{% endblock %}

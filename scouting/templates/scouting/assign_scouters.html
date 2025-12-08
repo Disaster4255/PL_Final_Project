@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Assign Scouters{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Assign Scouters to Match {{ match.match_number }}</h2>
+    <p>{{ match.event.name }} - {{ match.scheduled_time }}</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <h3 style="color: #d32f2f; margin-top: 1.5rem;">Red Alliance</h3>
+        
+        <div class="form-group">
+            <label for="scouter_0">Red 1 - Team {{ match.red_1.team_number }}</label>
+            <select id="scouter_0" name="scouter_0" required>
+                <option value="">Select Scouter</option>
+                {% for scouter in scouters %}
+                <option value="{{ scouter.id }}">{{ scouter.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="scouter_1">Red 2 - Team {{ match.red_2.team_number }}</label>
+            <select id="scouter_1" name="scouter_1" required>
+                <option value="">Select Scouter</option>
+                {% for scouter in scouters %}
+                <option value="{{ scouter.id }}">{{ scouter.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="scouter_2">Red 3 - Team {{ match.red_3.team_number }}</label>
+            <select id="scouter_2" name="scouter_2" required>
+                <option value="">Select Scouter</option>
+                {% for scouter in scouters %}
+                <option value="{{ scouter.id }}">{{ scouter.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <h3 style="color: #1976d2; margin-top: 1.5rem;">Blue Alliance</h3>
+        
+        <div class="form-group">
+            <label for="scouter_3">Blue 1 - Team {{ match.blue_1.team_number }}</label>
+            <select id="scouter_3" name="scouter_3" required>
+                <option value="">Select Scouter</option>
+                {% for scouter in scouters %}
+                <option value="{{ scouter.id }}">{{ scouter.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="scouter_4">Blue 2 - Team {{ match.blue_2.team_number }}</label>
+            <select id="scouter_4" name="scouter_4" required>
+                <option value="">Select Scouter</option>
+                {% for scouter in scouters %}
+                <option value="{{ scouter.id }}">{{ scouter.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="scouter_5">Blue 3 - Team {{ match.blue_3.team_number }}</label>
+            <select id="scouter_5" name="scouter_5" required>
+                <option value="">Select Scouter</option>
+                {% for scouter in scouters %}
+                <option value="{{ scouter.id }}">{{ scouter.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <button type="submit" class="btn btn-success">Assign Scouters</button>
+        <a href="{% url 'match_detail' match.id %}" class="btn" style="background: #6c757d;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

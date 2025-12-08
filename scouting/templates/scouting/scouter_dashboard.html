@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}My Assignments{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>My Scouting Assignments</h2>
+    <p>Level {{ user.profile.level }} | XP: {{ user.profile.experience_points }} | Prediction Points: {{ user.profile.prediction_points }}</p>
+</div>
+
+<div class="card">
+    <h2>Upcoming Assignments</h2>
+    {% if upcoming_assignments %}
+    <table>
+        <thead>
+            <tr>
+                <th>Match</th>
+                <th>Team</th>
+                <th>Position</th>
+                <th>Time</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for assignment in upcoming_assignments %}
+            <tr>
+                <td>Match {{ assignment.match.match_number }}</td>
+                <td>Team {{ assignment.team.team_number }}</td>
+                <td>{{ assignment.get_position_display }}</td>
+                <td>{{ assignment.match.scheduled_time|date:"M d, H:i" }}</td>
+                <td>
+                    {% if not assignment.reports.exists %}
+                    <a href="{% url 'submit_report' assignment.id %}" class="btn btn-success">Start Scouting</a>
+                    {% else %}
+                    <span style="color: green;">✓ Completed</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No upcoming assignments. Check with your strategist for match assignments.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Recent Reports</h2>
+    {% if recent_reports %}
+    <table>
+        <thead>
+            <tr>
+                <th>Match</th>
+                <th>Team</th>
+                <th>Rating</th>
+                <th>Submitted</th>
+                <th>Confirmed</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in recent_reports %}
+            <tr>
+                <td>Match {{ report.match.match_number }}</td>
+                <td>Team {{ report.team.team_number }}</td>
+                <td>{{ report.overall_rating }}/10</td>
+                <td>{{ report.submitted_at|date:"M d, H:i" }}</td>
+                <td>
+                    {% if report.confirmed %}
+                    <span style="color: green;">✓</span>
+                    {% else %}
+                    <span style="color: orange;">Pending</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No reports submitted yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

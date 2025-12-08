@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Scan QR Code{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-qr-code-scan"></i> Scan QR Code</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Process offline scouting submissions</p>
+                    
+                    <!-- Tab Navigation -->
+                    <ul class="nav nav-tabs mb-3" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#paste-tab">
+                                <i class="bi bi-clipboard"></i> Paste Data
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#camera-tab">
+                                <i class="bi bi-camera"></i> Use Camera (HTML5)
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Paste Tab -->
+                        <div id="paste-tab" class="tab-pane fade show active">
+                            <form method="post" id="qr-form">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="qr_data" class="form-label">QR Code Data</label>
+                                    <textarea 
+                                        id="qr_data" 
+                                        name="qr_data" 
+                                        class="form-control font-monospace" 
+                                        rows="8" 
+                                        required 
+                                        placeholder="Paste the base64-encoded data here..."
+                                    ></textarea>
+                                    <small class="form-text text-muted">
+                                        The data should look like: eyJtYXRjaF9pZCI6MTIsInRlYW1f...
+                                    </small>
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check-circle"></i> Process QR Code
+                                </button>
+                                <a href="{% url 'event_list' %}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                            </form>
+                        </div>
+                        
+                        <!-- Camera Tab -->
+                        <div id="camera-tab" class="tab-pane fade">
+                            <div class="alert alert-info">
+                                <h6><i class="bi bi-info-circle"></i> Camera QR Scanning</h6>
+                                <p class="mb-0">
+                                    For camera-based QR scanning, you would need to implement HTML5 getUserMedia API 
+                                    with a JavaScript QR code library. Since we're using only Python standard library, 
+                                    this feature requires additional client-side JavaScript libraries.
+                                </p>
+                            </div>
+                            <p><strong>Alternative:</strong> Take a photo of the QR code and use an external QR code reader app to extract the text, then paste it in the first tab.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">How to Use</h5>
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li>Have the scouter open their QR code screen (from offline submission)</li>
+                        <li>Click "Show Raw Data" on their screen to reveal the text data</li>
+                        <li>Copy the entire text data from the textarea</li>
+                        <li>Paste it into the "QR Code Data" field above</li>
+                        <li>Click "Process QR Code" to save the submission</li>
+                    </ol>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <strong>⚠️ Important:</strong> Make sure the data is complete and not truncated. 
+                        The submission will fail if the data is incomplete or corrupted.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-trim whitespace from textarea
+document.getElementById('qr-form').addEventListener('submit', function(e) {
+    const textarea = document.getElementById('qr_data');
+    textarea.value = textarea.value.trim();
+    
+    if (!textarea.value) {
+        e.preventDefault();
+        alert('Please enter the QR code data');
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}Match {{ match.match_number }} Reports{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Match {{ match.match_number }} - Scouting Reports</h2>
+    <p>{{ match.event.name }} - {{ match.scheduled_time|date:"M d, Y H:i" }}</p>
+    
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0;">
+        <div>
+            <strong>Red Alliance:</strong> 
+            {{ match.red_1.team_number }}, {{ match.red_2.team_number }}, {{ match.red_3.team_number }}
+            {% if match.red_score is not None %}
+            <span style="color: #d32f2f; font-weight: bold;"> - {{ match.red_score }} points</span>
+            {% endif %}
+        </div>
+        <div>
+            <strong>Blue Alliance:</strong> 
+            {{ match.blue_1.team_number }}, {{ match.blue_2.team_number }}, {{ match.blue_3.team_number }}
+            {% if match.blue_score is not None %}
+            <span style="color: #1976d2; font-weight: bold;"> - {{ match.blue_score }} points</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div style="background: #f5f5f5; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
+        <h3>Submission Status</h3>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+            <div>
+                <strong>Total Assignments:</strong> {{ total_assignments }}
+            </div>
+            <div style="color: green;">
+                <strong>Confirmed:</strong> {{ confirmed_reports }}
+            </div>
+            <div style="color: orange;">
+                <strong>Pending:</strong> {{ pending_reports }}
+            </div>
+            <div style="color: red;">
+                <strong>Missing:</strong> {{ missing_reports }}
+            </div>
+        </div>
+    </div>
+    
+    <div style="margin: 1rem 0;">
+        <strong>Match Status:</strong> 
+        <span style="padding: 0.25rem 0.5rem; border-radius: 4px; background: 
+            {% if match.status == 'COMPLETED' %}#4caf50{% elif match.status == 'IN_PROGRESS' %}#ff9800{% else %}#2196f3{% endif %}; 
+            color: white;">
+            {{ match.get_status_display }}
+        </span>
+    </div>
+    
+    {% if match.status != 'COMPLETED' %}
+    <a href="{% url 'complete_match' match.id %}" class="btn btn-success">Complete Match & Verify Predictions</a>
+    {% endif %}
+    <a href="{% url 'match_detail' match.id %}" class="btn" style="background: #6c757d;">Back to Match</a>
+</div>
+
+<div class="card">
+    <h2>Scouting Reports ({{ reports.count }})</h2>
+    
+    {% if reports %}
+    <table>
+        <thead>
+            <tr>
+                <th>Scouter</th>
+                <th>Team</th>
+                <th>Position</th>
+                <th>Overall Rating</th>
+                <th>Auto</th>
+                <th>Teleop</th>
+                <th>Endgame</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr>
+                <td>{{ report.scouter.username }}</td>
+                <td style="font-weight: bold;">{{ report.team.team_number }}</td>
+                <td>{{ report.assignment.get_position_display }}</td>
+                <td>{{ report.overall_rating }}/10</td>
+                <td>
+                    <strong>{{ report.auto_game_pieces_scored }}</strong> scored<br>
+                    <small>{{ report.auto_points_estimate }} pts est.</small>
+                </td>
+                <td>
+                    <strong>{{ report.teleop_game_pieces_scored }}</strong> scored<br>
+                    <small>Def: {{ report.teleop_defense_rating }}/5, Speed: {{ report.teleop_speed_rating }}/5</small>
+                </td>
+                <td>
+                    {% if report.endgame_climb_success %}✓ Climb{% elif report.endgame_park %}✓ Park{% else %}—{% endif %}<br>
+                    <small>{{ report.endgame_points_estimate }} pts est.</small>
+                </td>
+                <td>
+                    {% if report.confirmed %}
+                    <span style="color: green;">✓ Confirmed</span><br>
+                    <small>by {{ report.confirmed_by.username }}</small>
+                    {% else %}
+                    <span style="color: orange;">⚠ Pending</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if not report.confirmed %}
+                    <a href="{% url 'confirm_report' report.id %}" class="btn btn-success" style="font-size: 0.9rem; padding: 0.25rem 0.5rem;">Confirm</a>
+                    {% endif %}
+                    <a href="{% url 'generate_qr_code' report.id %}" class="btn btn-info" style="font-size: 0.9rem; padding: 0.25rem 0.5rem;" title="Generate QR Code for offline backup">
+                        <i class="bi bi-qr-code"></i> QR
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="9" style="background: #f9f9f9; font-size: 0.9rem;">
+                    {% if report.pre_match_notes %}<strong>Pre:</strong> {{ report.pre_match_notes }}<br>{% endif %}
+                    {% if report.auto_notes %}<strong>Auto:</strong> {{ report.auto_notes }}<br>{% endif %}
+                    {% if report.teleop_notes %}<strong>Teleop:</strong> {{ report.teleop_notes }}<br>{% endif %}
+                    {% if report.endgame_notes %}<strong>Endgame:</strong> {{ report.endgame_notes }}<br>{% endif %}
+                    {% if report.post_match_notes %}<strong>Post:</strong> {{ report.post_match_notes }}{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No reports submitted yet.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Match Predictions ({{ predictions.count }})</h2>
+    
+    {% if predictions %}
+    <table>
+        <thead>
+            <tr>
+                <th>Scouter</th>
+                <th>Predicted Winner</th>
+                <th>Result</th>
+                <th>Points Awarded</th>
+                <th>Submitted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prediction in predictions %}
+            <tr>
+                <td>{{ prediction.scouter.username }}</td>
+                <td style="color: {% if prediction.predicted_winner == 'RED' %}#d32f2f{% else %}#1976d2{% endif %}; font-weight: bold;">
+                    {{ prediction.predicted_winner }} Alliance
+                </td>
+                <td>
+                    {% if prediction.is_correct is None %}
+                    <span style="color: gray;">—</span>
+                    {% elif prediction.is_correct %}
+                    <span style="color: green;">✓ Correct</span>
+                    {% else %}
+                    <span style="color: red;">✗ Incorrect</span>
+                    {% endif %}
+                </td>
+                <td>{{ prediction.points_awarded }}</td>
+                <td>{{ prediction.created_at|date:"M d, H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No predictions submitted yet.</p>
+    {% endif %}
+</div>
+
+{% if missing_reports > 0 %}
+<div class="card" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+    <h3>⚠ Missing Reports</h3>
+    <p>The following scouters have not submitted their reports:</p>
+    <ul>
+        {% for assignment in assignments %}
+            {% if not assignment.reports.exists %}
+            <li><strong>{{ assignment.scouter.username }}</strong> - {{ assignment.get_position_display }} (Team {{ assignment.team.team_number }})</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% endblock %}
