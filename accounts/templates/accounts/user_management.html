@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>User Management</h2>
+    <a href="{% url 'create_user' %}" class="btn">Create New User</a>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Level</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.username }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.profile.get_role_display }}</td>
+                <td>{{ u.profile.level }}</td>
+                <td>
+                    <form method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                        <input type="hidden" name="action" value="change_role">
+                        <select name="role" onchange="this.form.submit()">
+                            <option value="ADMIN" {% if u.profile.role == 'ADMIN' %}selected{% endif %}>Admin</option>
+                            <option value="STRATEGIST" {% if u.profile.role == 'STRATEGIST' %}selected{% endif %}>Strategist</option>
+                            <option value="SCOUTER" {% if u.profile.role == 'SCOUTER' %}selected{% endif %}>Scouter</option>
+                        </select>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

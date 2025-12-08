@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>User Profile: {{ user.username }}</h2>
+    <p><strong>Role:</strong> {{ profile.get_role_display }}</p>
+    <p><strong>Level:</strong> {{ profile.level }}</p>
+    <p><strong>Experience Points:</strong> {{ profile.experience_points }}</p>
+    <p><strong>Prediction Points:</strong> {{ profile.prediction_points }}</p>
+</div>
+
+<div class="card">
+    <h2>Achievements</h2>
+    {% if achievements %}
+    <table>
+        <thead>
+            <tr>
+                <th>Badge</th>
+                <th>Description</th>
+                <th>Earned</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for achievement in achievements %}
+            <tr>
+                <td>{{ achievement.get_badge_type_display }}</td>
+                <td>{{ achievement.description }}</td>
+                <td>{{ achievement.earned_at|date:"M d, Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No achievements yet. Keep scouting to earn badges!</p>
+    {% endif %}
+</div>
+{% endblock %}
