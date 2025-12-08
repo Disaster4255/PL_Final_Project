@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Welcome, {{ user.username }}!</h2>
+    <p>Role: <strong>{{ user.profile.get_role_display }}</strong> | Level: <strong>{{ user.profile.level }}</strong></p>
+</div>
+
+<!-- Statistics Overview -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
+        <h3 style="margin: 0; font-size: 2rem;">{{ total_events }}</h3>
+        <p style="margin: 0.5rem 0 0 0;">Total Events</p>
+    </div>
+    <div class="card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; text-align: center;">
+        <h3 style="margin: 0; font-size: 2rem;">{{ total_teams }}</h3>
+        <p style="margin: 0.5rem 0 0 0;">Teams Tracked</p>
+    </div>
+    <div class="card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; text-align: center;">
+        <h3 style="margin: 0; font-size: 2rem;">{{ total_reports }}</h3>
+        <p style="margin: 0.5rem 0 0 0;">Scouting Reports</p>
+    </div>
+    <div class="card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; text-align: center;">
+        <h3 style="margin: 0; font-size: 2rem;">{{ teams_with_epa }}</h3>
+        <p style="margin: 0.5rem 0 0 0;">Teams with EPA Data</p>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Recent Events</h2>
+    {% if events %}
+    <table>
+        <thead>
+            <tr>
+                <th>Event Name</th>
+                <th>Code</th>
+                <th>Dates</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td>{{ event.name }}</td>
+                <td>{{ event.event_code }}</td>
+                <td>{{ event.start_date }} - {{ event.end_date }}</td>
+                <td>
+                    <a href="{% url 'event_detail' event.id %}" class="btn">View</a>
+                    <a href="{% url 'team_stats' event.id %}" class="btn btn-success">Stats</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No events yet. {% if user.profile.can_manage_events %}<a href="{% url 'create_event' %}">Create one!</a>{% endif %}</p>
+    {% endif %}
+</div>
+
+{% if recent_reports %}
+<div class="card">
+    <h2>Recent Scouting Activity</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Team</th>
+                <th>Match</th>
+                <th>Scouter</th>
+                <th>Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in recent_reports %}
+            <tr>
+                <td>{{ report.submitted_at|date:"m/d H:i" }}</td>
+                <td>Team {{ report.team.team_number }}</td>
+                <td>{{ report.match.match_number }}</td>
+                <td>{{ report.scouter.username }}</td>
+                <td>{{ report.overall_rating }}/10</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if user.profile.role == 'SCOUTER' %}
+<div class="card">
+    <p><a href="{% url 'scouter_dashboard' %}" class="btn btn-success">Go to My Assignments</a></p>
+</div>
+{% endif %}
+{% endblock %}

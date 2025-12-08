@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Events{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Events</h2>
+    {% if user.profile.can_manage_events %}
+    <a href="{% url 'create_event' %}" class="btn btn-success">Create New Event</a>
+    {% endif %}
+    
+    {% if events %}
+    <table>
+        <thead>
+            <tr>
+                <th>Event Name</th>
+                <th>Code</th>
+                <th>Location</th>
+                <th>Dates</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td>{{ event.name }}</td>
+                <td>{{ event.event_code }}</td>
+                <td>{{ event.location }}</td>
+                <td>{{ event.start_date }} to {{ event.end_date }}</td>
+                <td>
+                    <a href="{% url 'event_detail' event.id %}" class="btn">View Details</a>
+                    {% if user.profile.can_manage_events %}
+                    <a href="{% url 'delete_event' event.id %}" class="btn" style="background: #dc3545; font-size: 0.9rem;">Delete</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No events created yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

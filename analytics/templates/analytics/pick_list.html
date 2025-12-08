@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Pick List{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Alliance Selection Pick List</h2>
+    <p>{{ event.name }} - Recommended team rankings for alliance selection</p>
+    <a href="{% url 'export_data' event.id %}?type=team_stats" class="btn">Export Pick List</a>
+</div>
+
+<div class="card">
+    {% if pick_list %}
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Team</th>
+                <th>Nickname</th>
+                <th>Combined Score</th>
+                <th>Internal Rating</th>
+                <th>EPA</th>
+                <th>Auto</th>
+                <th>Teleop</th>
+                <th>Climb %</th>
+                <th>Win Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in pick_list %}
+            <tr {% if item.stats.statbotics_epa and item.stats.matches_scouted > 0 %}style="background: #f0f8ff"{% endif %}>
+                <td><strong>{{ item.rank }}</strong></td>
+                <td><strong>{{ item.team.team_number }}</strong></td>
+                <td>{{ item.team.nickname|truncatechars:15|default:"-" }}</td>
+                <td><strong>{{ item.combined_score|floatformat:1 }}</strong></td>
+                <td>{{ item.stats.avg_overall_rating|floatformat:1 }}</td>
+                <td>{{ item.stats.statbotics_epa|floatformat:1|default:"-" }}</td>
+                <td>{{ item.stats.avg_auto_points|floatformat:1 }}</td>
+                <td>{{ item.stats.avg_teleop_game_pieces|floatformat:1 }}</td>
+                <td>{{ item.stats.climb_success_rate|floatformat:0 }}%</td>
+                <td>{{ item.stats.statbotics_win_rate|floatformat:2|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p style="margin-top: 1rem; color: #666;">
+        <strong>Note:</strong> Blue-highlighted rows have both internal scouting data and Statbotics data. 
+        Combined Score uses weighted average (60% internal, 40% Statbotics).
+    </p>
+    {% else %}
+    <p>No data available. Scout matches to generate a pick list.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3>Pick List Guide</h3>
+    <ul>
+        <li><strong>Overall Rating:</strong> Average rating (0-10) from all scouting reports</li>
+        <li><strong>Auto:</strong> Average autonomous points</li>
+        <li><strong>Teleop:</strong> Average teleoperated game pieces scored</li>
+        <li><strong>Climb %:</strong> Percentage of successful climbs</li>
+        <li><strong>Reliability:</strong> Score based on consistency (no breakdowns, low fouls)</li>
+        <li><strong>EPA:</strong> Expected Points Added from Statbotics.io</li>
+    </ul>
+</div>
+{% endblock %}

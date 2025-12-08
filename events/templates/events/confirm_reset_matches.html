@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Reset Matches - {{ event.name }}{% endblock %}
+
+{% block content %}
+<div class="card" style="border-left: 4px solid #ff9800;">
+    <h2>⚠ Reset All Matches to Upcoming</h2>
+    <p><strong>Event:</strong> {{ event.name }}</p>
+    
+    <div style="background: #fff3cd; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
+        <h3>Warning: This action will:</h3>
+        <ul>
+            <li>Reset all <strong>{{ total_matches }}</strong> matches to UPCOMING status</li>
+            <li>Clear all match scores (red_score, blue_score, winner)</li>
+            <li>Reset all prediction verification results</li>
+            <li>Reset prediction points awarded to 0</li>
+            <li><strong>Scouting reports will NOT be deleted</strong> (they remain for reference)</li>
+        </ul>
+    </div>
+    
+    <div style="background: #e3f2fd; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
+        <h3>ℹ Use Case: Training Scouters</h3>
+        <p>This feature is designed for training new scouters by allowing them to practice with real event data:</p>
+        <ul>
+            <li>Scouters can practice submitting reports</li>
+            <li>Strategists can practice confirming reports and completing matches</li>
+            <li>All participants can practice the full workflow</li>
+            <li>Event can be reset and reused for multiple training sessions</li>
+        </ul>
+    </div>
+    
+    <div style="background: #ffebee; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
+        <h3>Current Status:</h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+            <div style="text-align: center; padding: 0.5rem; background: white; border-radius: 4px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #333;">{{ total_matches }}</div>
+                <div style="color: #666;">Total Matches</div>
+            </div>
+            <div style="text-align: center; padding: 0.5rem; background: white; border-radius: 4px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #4caf50;">{{ completed_matches }}</div>
+                <div style="color: #666;">Completed</div>
+            </div>
+            <div style="text-align: center; padding: 0.5rem; background: white; border-radius: 4px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #2196f3;">{{ total_matches|add:"-"|add:completed_matches|default:"0" }}</div>
+                <div style="color: #666;">Upcoming/In Progress</div>
+            </div>
+        </div>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div style="margin: 1.5rem 0;">
+            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" name="confirm_reset" required>
+                <span>I understand this will reset all matches and predictions for training purposes</span>
+            </label>
+        </div>
+        
+        <button type="submit" class="btn" style="background: #ff9800; color: white;">Reset All Matches</button>
+        <a href="{% url 'event_detail' event.id %}" class="btn" style="background: #6c757d;">Cancel</a>
+    </form>
+</div>
+
+<style>
+    .card ul {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+    }
+    
+    .card li {
+        margin: 0.5rem 0;
+    }
+</style>
+{% endblock %}

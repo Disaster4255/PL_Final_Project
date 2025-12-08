@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ event.name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>{{ event.name }}</h2>
+    <p><strong>Event Code:</strong> {{ event.event_code }}</p>
+    {% if event.tba_event_key %}
+    <p><strong>TBA Key:</strong> <a href="https://www.thebluealliance.com/event/{{ event.tba_event_key }}" target="_blank">{{ event.tba_event_key }}</a></p>
+    {% endif %}
+    {% if event.event_type_string %}
+    <p><strong>Type:</strong> {{ event.event_type_string }} {% if event.week %}(Week {{ event.week }}){% endif %}</p>
+    {% endif %}
+    <p><strong>Location:</strong> {{ event.location }}</p>
+    <p><strong>Dates:</strong> {{ event.start_date }} - {{ event.end_date }}</p>
+    
+    {% if user.profile.can_assign_scouters %}
+    <a href="{% url 'auto_assign_scouters' event.id %}" class="btn btn-success">Auto-Assign Scouters</a>
+    {% if event.tba_event_key %}
+    <a href="{% url 'sync_statbotics' event.id %}" class="btn" style="background: #17a2b8;">Sync Statbotics Data</a>
+    <a href="{% url 'reimport_event' event.id %}" class="btn" style="background: #ffc107; color: #000;">Re-import from TBA</a>
+    {% endif %}
+    <a href="{% url 'reset_matches' event.id %}" class="btn" style="background: #ff9800; color: white;" title="Reset all matches to UPCOMING for training">Reset Matches (Training)</a>
+    {% endif %}
+    <a href="{% url 'team_stats' event.id %}" class="btn">Team Statistics</a>
+    <a href="{% url 'pick_list' event.id %}" class="btn">Pick List</a>
+    <a href="{% url 'export_data' event.id %}?type=all" class="btn">Export Data</a>
+    {% if user.profile.can_manage_events %}
+    <a href="{% url 'delete_event' event.id %}" class="btn" style="background: #dc3545;">Delete Event</a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Teams ({{ teams.count }})</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem;">
+        {% for team in teams %}
+        <span style="padding: 0.5rem; background: #f8f9fa; border-radius: 4px; text-align: center;">{{ team.team_number }}</span>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card">
+    <h2>Matches ({{ matches.count }})</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Match #</th>
+                <th>Type</th>
+                <th>Time</th>
+                <th>Red Alliance</th>
+                <th>Blue Alliance</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for match in matches %}
+            <tr>
+                <td>{{ match.match_number }}</td>
+                <td>{{ match.get_match_type_display }}</td>
+                <td>{{ match.scheduled_time|date:"M d, H:i" }}</td>
+                <td>{{ match.red_1.team_number }}, {{ match.red_2.team_number }}, {{ match.red_3.team_number }}</td>
+                <td>{{ match.blue_1.team_number }}, {{ match.blue_2.team_number }}, {{ match.blue_3.team_number }}</td>
+                <td>{{ match.get_status_display }}</td>
+                <td>
+                    <a href="{% url 'match_detail' match.id %}" class="btn">View</a>
+                    {% if user.profile.can_assign_scouters %}
+                    <a href="{% url 'assign_scouters' match.id %}" class="btn btn-success">Assign</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

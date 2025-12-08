@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Match Analytics{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Match {{ match.match_number }} Analytics</h2>
+    <p>{{ match.event.name }}</p>
+</div>
+
+{% if aggregate %}
+<div class="card">
+    <h2>Predicted Scores</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div style="background: #ffebee; padding: 1rem; border-radius: 4px;">
+            <h3>Red Alliance</h3>
+            <p><strong>Predicted Score:</strong> {{ aggregate.red_predicted_score }}</p>
+            <p>Auto: {{ aggregate.red_total_auto_points }}</p>
+            <p>Teleop: {{ aggregate.red_total_teleop_points }}</p>
+            <p>Endgame: {{ aggregate.red_total_endgame_points }}</p>
+        </div>
+        <div style="background: #e3f2fd; padding: 1rem; border-radius: 4px;">
+            <h3>Blue Alliance</h3>
+            <p><strong>Predicted Score:</strong> {{ aggregate.blue_predicted_score }}</p>
+            <p>Auto: {{ aggregate.blue_total_auto_points }}</p>
+            <p>Teleop: {{ aggregate.blue_total_teleop_points }}</p>
+            <p>Endgame: {{ aggregate.blue_total_endgame_points }}</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Individual Scouting Reports</h2>
+    {% if reports %}
+    <table>
+        <thead>
+            <tr>
+                <th>Team</th>
+                <th>Scouter</th>
+                <th>Auto Pts</th>
+                <th>Teleop Pieces</th>
+                <th>Endgame Pts</th>
+                <th>Overall</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr>
+                <td>{{ report.team.team_number }}</td>
+                <td>{{ report.scouter.username }}</td>
+                <td>{{ report.auto_points_estimate }}</td>
+                <td>{{ report.teleop_game_pieces_scored }}</td>
+                <td>{{ report.endgame_points_estimate }}</td>
+                <td>{{ report.overall_rating }}/10</td>
+                <td>{{ report.post_match_notes|truncatewords:10 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No confirmed reports yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

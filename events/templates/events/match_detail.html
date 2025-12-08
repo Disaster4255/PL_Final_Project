@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Match {{ match.match_number }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>{{ match.event.name }} - Match {{ match.match_number }}</h2>
+    <p><strong>Type:</strong> {{ match.get_match_type_display }}</p>
+    <p><strong>Time:</strong> {{ match.scheduled_time }}</p>
+    <p><strong>Status:</strong> {{ match.get_status_display }}</p>
+    
+    <h3>Alliances</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div style="background: #ffebee; padding: 1rem; border-radius: 4px;">
+            <h4>Red Alliance</h4>
+            <p>{{ match.red_1.team_number }}, {{ match.red_2.team_number }}, {{ match.red_3.team_number }}</p>
+            {% if match.red_score %}<p><strong>Score:</strong> {{ match.red_score }}</p>{% endif %}
+        </div>
+        <div style="background: #e3f2fd; padding: 1rem; border-radius: 4px;">
+            <h4>Blue Alliance</h4>
+            <p>{{ match.blue_1.team_number }}, {{ match.blue_2.team_number }}, {{ match.blue_3.team_number }}</p>
+            {% if match.blue_score %}<p><strong>Score:</strong> {{ match.blue_score }}</p>{% endif %}
+        </div>
+    </div>
+    
+    {% if user.profile.role == 'SCOUTER' %}
+    <a href="{% url 'submit_prediction' match.id %}" class="btn">Submit Prediction</a>
+    {% endif %}
+    
+    {% if user.profile.can_assign_scouters %}
+    <a href="{% url 'assign_scouters' match.id %}" class="btn btn-success">Assign Scouters</a>
+    <a href="{% url 'view_match_reports' match.id %}" class="btn" style="background: #2196f3;">View Reports</a>
+    {% if match.status != 'COMPLETED' %}
+    <a href="{% url 'complete_match' match.id %}" class="btn" style="background: #4caf50;">Complete Match</a>
+    {% endif %}
+    {% endif %}
+    
+    <a href="{% url 'match_analytics' match.id %}" class="btn">View Analytics</a>
+</div>
+
+<div class="card">
+    <h2>Scouter Assignments</h2>
+    {% if assignments %}
+    <table>
+        <thead>
+            <tr>
+                <th>Position</th>
+                <th>Team</th>
+                <th>Scouter</th>
+                <th>Report Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for assignment in assignments %}
+            <tr>
+                <td>{{ assignment.get_position_display }}</td>
+                <td>{{ assignment.team.team_number }}</td>
+                <td>{{ assignment.scouter.username }}</td>
+                <td>
+                    {% if assignment.reports.exists %}
+                    <span style="color: green;">✓ Submitted</span>
+                    {% else %}
+                    <span style="color: orange;">Pending</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No scouters assigned yet.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Predictions</h2>
+    {% if predictions %}
+    <table>
+        <thead>
+            <tr>
+                <th>Scouter</th>
+                <th>Predicted Winner</th>
+                <th>Correct?</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prediction in predictions %}
+            <tr>
+                <td>{{ prediction.scouter.username }}</td>
+                <td>{{ prediction.predicted_winner }}</td>
+                <td>
+                    {% if prediction.is_correct is None %}
+                    <span style="color: gray;">-</span>
+                    {% elif prediction.is_correct %}
+                    <span style="color: green;">✓</span>
+                    {% else %}
+                    <span style="color: red;">✗</span>
+                    {% endif %}
+                </td>
+                <td>{{ prediction.points_awarded }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No predictions submitted yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
