@@ -1,5 +1,5 @@
 # Final Project Video
-[click me](https://www.youtube.com/watch?v=IAzY55)
+[click me](https://www.youtube.com/watch?v=IAzY55P-gjQ)
 
 # FRC Scouting App
 
@@ -100,7 +100,7 @@ MIT License
 
 
 # 期末報告影片
-[點此開啟](https://www.youtube.com/watch?v=IAzY55)
+[點此開啟](https://www.youtube.com/watch?v=IAzY55P-gjQ)
 
 # FRC 偵查分析應用程式 (FRC Scouting App)
 
