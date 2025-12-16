@@ -1,3 +1,6 @@
+# Final Project Video
+[click me](https://www.youtube.com/watch?v=IAzY55)
+
 # FRC Scouting App
 
 A Django web application for FRC (FIRST Robotics Competition) scouting and team analysis.
@@ -96,7 +99,8 @@ MIT License
 
 
 
-
+# 期末報告影片
+[點此開啟](https://www.youtube.com/watch?v=IAzY55)
 
 # FRC 偵查分析應用程式 (FRC Scouting App)
 
